@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu dinâmico com submenus infinitos utilizando AngularJS e PHP</title>
+
+    <script type="text/javascript" src="js/angular.min.js"></script>
+
+    <style type="text/css">
+
+        span.nivel1 {
+            color: red;
+        }
+
+        span.nivel2 {
+            color: blue;
+        }
+
+        span.nivel3 {
+            color: limegreen;
+        }
+
+        span.nivel4 {
+            color: orange;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+
+        // Criando module
+        var app = angular.module('appModule', []);
+
+        // Criando controller
+        app.controller('menuController', function($http) {
+
+            // Armazenando o objeto do controller para evitar conflitos
+            var self = this;
+
+            // Lista de menus
+            self.menus = [];
+
+            // Método para carregar os menus
+            self.carregarMenus = function() {
+
+                // Fazendo requisição AJAX com o servidor para buscar menus
+                $http.get('api/menu.php').then(function(response) {
+
+                    // Armazena os menus retornados
+                    self.menus = response.data;
+
+                })
+
+            };
+
+        });
+
+    </script>
+
+</head>
+<!-- Definindo module que será utilizado -->
+<body ng-app="appModule">
+
+<!-- Definindo controller que será utilizado e carregando os menus -->
+<div ng-controller="menuController as ctrl" ng-init="ctrl.carregarMenus()">
+
+    <!-- Template de um único menu -->
+    <script type="text/ng-template" id="menu.html">
+        <span class="nivel{{menu.nivel}}" ng-bind="menu.descricao"></span>
+        <ul ng-if="menu.sub_menus">
+            <li ng-repeat="menu in menu.sub_menus" ng-include="'menu.html'"></li>
+        </ul>
+    </script>
+
+    <!-- Chamada inicial para construção do menu recursivamente -->
+    <ul>
+        <li ng-repeat="menu in ctrl.menus" ng-include="'menu.html'"></li>
+    </ul>
+
+</div>
+
+</body>
+</html>
